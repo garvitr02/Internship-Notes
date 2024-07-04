@@ -1,0 +1,6 @@
+prometheus-api-client
+pyod
+pandas
+numpy
+prometheus_client
+requests

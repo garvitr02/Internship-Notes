@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:8.9.0
+    container_name: metricbeat
+    volumes:
+      - ./metricbeat/config:/usr/share/metricbeat/config
+      - ./metricbeat/data:/usr/share/metricbeat/data
+    networks:
+      - opensearch-net
+    depends_on:
+      - logstash  # Assuming you have a logstash service defined
+
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:8.9.0
+    container_name: logstash
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g
+      - "DISABLE_SECURITY_PLUGIN=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    networks:
+      - opensearch-net
+
+  dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: dashboards
+    environment:
+      - OPENSEARCH_HOSTS=http://opensearch:9200
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
+    ports:
+      - "5601:5601"
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch
+
+networks:
+  opensearch-net:
+    driver: bridge

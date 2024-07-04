@@ -1,0 +1,7 @@
+pandas
+numpy
+scikit-learn
+pyod
+requests
+joblib
+prometheus_client

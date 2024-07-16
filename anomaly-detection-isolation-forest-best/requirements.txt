@@ -1,6 +1,0 @@
-numpy
-scikit-learn
-pyod
-joblib
-requests
-prometheus-api-client
